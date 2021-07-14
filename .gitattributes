@@ -1,0 +1,6 @@
+*.json filter=lfs diff=lfs merge=lfs -text
+*.bin filter=lfs diff=lfs merge=lfs -text
+*.txt filter=lfs diff=lfs merge=lfs -text
+BERT/*.json filter=lfs diff=lfs merge=lfs -text
+BERT/*.bin filter=lfs diff=lfs merge=lfs -text
+BERT/*.txt filter=lfs diff=lfs merge=lfs -text
