@@ -156,17 +156,12 @@ def postprocess_qa_predictions(examples, features, raw_predictions, n_best_size 
 
     return predictions
 
-with open("cache.json") as f:
-    cache = json.load(f)
-
-current_id = cache[0]['id']
-
 while True:
     context = input("Context: ")
     print("")
     
     if context.lower == "exit" or len(context) < 1:
-        exit()
+        break
 
     while True:
         question = input("Question: ")
@@ -179,7 +174,7 @@ while True:
             break
 
         data = {
-            'id': current_id + 1,
+            'id': 1,
             'context': context,
             'question': question
         }
