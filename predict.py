@@ -96,7 +96,7 @@ def prepare_validation_features(examples):
 
     return tokenized_examples
 
-def postprocess_qa_predictions(examples, features, raw_predictions, n_best_size = 20, max_answer_length = 30):
+def postprocess_qa_predictions(examples, features, raw_predictions, n_best_size = 20, max_answer_length = 100):
     all_start_logits, all_end_logits = raw_predictions
     # Build a map example to its corresponding features.
     example_id_to_index = {k: i for i, k in enumerate(examples["id"])}
