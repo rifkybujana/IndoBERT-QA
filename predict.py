@@ -1,9 +1,9 @@
+from numpy.lib import index_tricks
 from pandas.core.algorithms import mode
 
 import transformers
 import cpuinfo
 import torch
-import json
 import collections
 
 import pandas as pd
@@ -156,38 +156,49 @@ def postprocess_qa_predictions(examples, features, raw_predictions, n_best_size 
 
     return predictions
 
-while True:
-    context = input("Context: ")
-    print("")
-    
-    if context.lower == "exit" or len(context) < 1:
-        break
-
-    while True:
-        question = input("Question: ")
-        print("")
-
-        if question.lower() == "exit":
-            exit()
-
-        if len(question) < 1:
-            break
-
-        data = {
-            'id': 1,
+def predict(context, question):
+    data = []
+    if isinstance(question, list):
+        for i, q in enumerate(question):
+            data_temp = {
+                'id': i,
+                'context': context,
+                'question': q
+            }
+            data.append(data_temp)
+    else:
+        data.append({
+            'id': 0,
             'context': context,
             'question': question
-        }
+        })
 
-        data = pd.DataFrame([data])
-        data = Dataset.from_pandas(data)
+    data = Dataset.from_pandas(pd.DataFrame(data))
+    data_feature = data.map(prepare_validation_features, batched=True, remove_columns=data.column_names)
+    
+    trainer = Trainer(model=model)
+    raw_prediction = trainer.predict(data_feature)
+    final_predictions = postprocess_qa_predictions(data, data_feature, raw_prediction.predictions)
 
-        data_feature = data.map(prepare_validation_features, batched=True, remove_columns=data.column_names)
+    return final_predictions
+    
 
+if __name__ == '__main__':
+    while True:
+        context = input("Context: ")
         print("")
-
-        trainer = Trainer(model=model)
-        raw_prediction = trainer.predict(data_feature)
-        final_predictions = postprocess_qa_predictions(data, data_feature, raw_prediction.predictions)
         
-        print(f'\nAnswer: {final_predictions[1]}\n')
+        if context.lower == "exit" or len(context) < 1:
+            exit()
+
+        while True:
+            question = input("Question: ")
+            print("")
+
+            if question.lower() == "exit":
+                exit()
+
+            if len(question) < 1:
+                break
+            
+            print(f'\nAnswer: {predict(context, question)}\n')
