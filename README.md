@@ -1,3 +1,4 @@
+This project is part of my research with my friend Muhammad Fajrin Buyang Daffa entitled "Penggunaan Teknologi Deep Learning untuk Meningkatkan Pemahaman Membaca Siswa/i Penyandang Disleksia" for KOPSI (Kompetisi Penelitian Siswa Indonesia/Indonesian Student Research Competition).
 ## indoBERT Base-Uncased fine-tuned on Translated Squad v2.0
 [IndoBERT](https://huggingface.co/indolem/indobert-base-uncased) trained by [IndoLEM](https://indolem.github.io/) and fine-tuned on [Translated SQuAD 2.0](https://github.com/Wikidepia/indonesian_datasets/tree/master/question-answering/squad) for **Q&A** downstream task.
 **Model Size** (after training): 420mb
@@ -6,6 +7,7 @@
 - Indonesian Wikipedia (74M words)
 - news articles from Kompas, Tempo (Tala et al., 2003), and Liputan6 (55M words in total)
 - an Indonesian Web Corpus (Medved and Suchomel, 2017) (90M words).
+
 We trained the model for 2.4M steps (180 epochs) with the final perplexity over the development set being 3.97 (similar to English BERT-base).
 This IndoBERT was used to examine IndoLEM - an Indonesian benchmark that comprises of seven tasks for the Indonesian language, spanning morpho-syntax, semantics, and discourse.[[1]](#1)
 ## Details of the downstream task (Q&A) - Dataset
