@@ -12,14 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pandas.core.algorithms import mode
-
-import transformers
-import cpuinfo
-import torch
 import collections
-import time
-
+import streamlit as st
 import pandas as pd
 import numpy as np
 
@@ -34,22 +28,29 @@ from datasets import Dataset
 import LoggingSet
 LoggingSet.set_global_logging_level(LoggingSet.logging.ERROR)
 
+
+page = st.sidebar.selectbox("Page", ["Teman Belajar", "About"])
+
+st.title(f"*{page}*")
+
+# model path
 model_checkpoint = "model"
 
-print (f"\nUsing Transformer Library Version: ", transformers.__version__)
-print ("Using Torch Library Version: ", torch.__version__)
-print ("Using CPU: ", cpuinfo.get_cpu_info()['brand_raw'])
+@st.cache(allow_output_mutation=True, show_spinner=False)
+def load():
+    tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
+    model = AutoModelForQuestionAnswering.from_pretrained(model_checkpoint)
+    trainer = Trainer(model=model)
 
-print (f"\nLoading Tokenizers...")
-tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
+    return tokenizer, trainer
 
-print (f"\nLoading Model...\n")
-model = AutoModelForQuestionAnswering.from_pretrained(model_checkpoint)
-trainer = Trainer(model=model)
+with st.spinner("Loading Model..."):
+    tokenizer, trainer = load()
 
 pad_on_right = tokenizer.padding_side == "right"
 max_length = 384 # The maximum length of a feature (question and context)
 doc_stride = 128 # The authorized overlap between two part of the context when splitting it is needed.
+
 
 def prepare_validation_features(examples):
     # Some of the questions have lots of whitespace on the left, which is not useful and will make the
@@ -96,6 +97,7 @@ def prepare_validation_features(examples):
 
     return tokenized_examples
 
+
 def postprocess_qa_predictions(examples, features, raw_predictions, n_best_size = 20, max_answer_length = 100):
     all_start_logits, all_end_logits = raw_predictions
     # Build a map example to its corresponding features.
@@ -128,6 +130,8 @@ def postprocess_qa_predictions(examples, features, raw_predictions, n_best_size 
             # Update minimum null prediction.
             cls_index = features[feature_index]["input_ids"].index(tokenizer.cls_token_id)
             feature_null_score = start_logits[cls_index] + end_logits[cls_index]
+            print (f'\n{start_logits[cls_index]}')
+
             if min_null_score is None or min_null_score < feature_null_score:
                 min_null_score = feature_null_score
 
@@ -159,17 +163,19 @@ def postprocess_qa_predictions(examples, features, raw_predictions, n_best_size 
                     )
         
         if len(valid_answers) > 0:
-            best_answer = sorted(valid_answers, key=lambda x: x["score"], reverse=True)[0]
+            sorted_answer = sorted(valid_answers, key=lambda x: x["score"], reverse=True)
+            best_answer = sorted_answer[0]
         else:
             # In the very rare edge case we have not a single non-null prediction, we create a fake prediction to avoid
             # failure.
             best_answer = {"text": "", "score": 0.0}
         
         # Let's pick our final answer: the best one or the null answer
-        answer = best_answer["text"] if best_answer["score"] > min_null_score else ""
+        answer = best_answer["text"] if abs(best_answer["score"]) - abs(min_null_score) > -1 else "there is no such information in the text"
         predictions[example["id"]] = answer
 
-    return predictions
+    return predictions, sorted_answer
+
 
 def predict(context, question):
     data = []
@@ -192,28 +198,24 @@ def predict(context, question):
     data_feature = data.map(prepare_validation_features, batched=True, remove_columns=data.column_names)
     
     raw_prediction = trainer.predict(data_feature)
-    final_predictions = postprocess_qa_predictions(data, data_feature, raw_prediction.predictions)
+    final_predictions, answers = postprocess_qa_predictions(data, data_feature, raw_prediction.predictions)
 
-    return final_predictions
+    return final_predictions, answers
     
+if page == "Teman Belajar":
+    context = st.text_area(label="Context", help="Teks yang ingin dianalisa", height=200)
+    question = st.text_input(label="Question", help="Pertanyaan yang ingin ditanyakan terkait teks")
 
-if __name__ == '__main__':
-    while True:
-        context = input("Context: ")
-        print("")
-
-        while True:
-            if context.lower() == "exit" or len(context) < 1:
-                exit()
-
-            question = input("Question: ")
-            print("")
-
-            if question.lower() == "exit":
-                exit()
-
-            if len(question) < 1:
-                break
+    if st.button("Ask The AI"):
+        with st.spinner("Computing..."):
+            predictions, answers = predict(context, question)
             
-            start = time.process_time()
-            print(f'\nAnswer: {predict(context, question)}\ntime: {time.process_time() - start}\n')
+        st.write(predictions[0])
+        with st.beta_expander("Other Answer"):
+            st.write([{
+                'score': answer['score'].item(),
+                'text': answer['text']
+            } for answer in answers])
+else:
+    with open("README.md", "r") as f:
+        st.write(f.read())
