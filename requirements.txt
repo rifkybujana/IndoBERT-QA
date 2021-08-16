@@ -1,0 +1,7 @@
+py_cpuinfo==8.0.0
+transformers==4.8.2
+torch==1.9.0
+tqdm==4.61.2
+numpy==1.19.5
+datasets==1.9.0
+pandas==1.3.0
