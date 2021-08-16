@@ -18,6 +18,7 @@ import transformers
 import cpuinfo
 import torch
 import collections
+import time
 
 import pandas as pd
 import numpy as np
@@ -44,6 +45,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
 
 print (f"\nLoading Model...\n")
 model = AutoModelForQuestionAnswering.from_pretrained(model_checkpoint)
+trainer = Trainer(model=model)
 
 pad_on_right = tokenizer.padding_side == "right"
 max_length = 384 # The maximum length of a feature (question and context)
@@ -189,7 +191,6 @@ def predict(context, question):
     data = Dataset.from_pandas(pd.DataFrame(data))
     data_feature = data.map(prepare_validation_features, batched=True, remove_columns=data.column_names)
     
-    trainer = Trainer(model=model)
     raw_prediction = trainer.predict(data_feature)
     final_predictions = postprocess_qa_predictions(data, data_feature, raw_prediction.predictions)
 
@@ -200,11 +201,11 @@ if __name__ == '__main__':
     while True:
         context = input("Context: ")
         print("")
-        
-        if context.lower == "exit" or len(context) < 1:
-            exit()
 
         while True:
+            if context.lower() == "exit" or len(context) < 1:
+                exit()
+
             question = input("Question: ")
             print("")
 
@@ -214,4 +215,5 @@ if __name__ == '__main__':
             if len(question) < 1:
                 break
             
-            print(f'\nAnswer: {predict(context, question)}\n')
+            start = time.process_time()
+            print(f'\nAnswer: {predict(context, question)}\ntime: {time.process_time() - start}\n')
