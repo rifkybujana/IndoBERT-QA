@@ -206,11 +206,11 @@ if page == "Teman Belajar":
     context = st.text_area(label="Context", help="Teks yang ingin dianalisa", height=200)
     question = st.text_input(label="Question", help="Pertanyaan yang ingin ditanyakan terkait teks")
 
-    if st.button("Ask The AI"):
+    if st.button("Submit"):
         with st.spinner("Computing..."):
             predictions, answers = predict(context, question)
             
-        st.write(predictions[0])
+        st.success(predictions[0])
         with st.beta_expander("Other Answer"):
             st.write([{
                 'score': answer['score'].item(),
@@ -218,4 +218,5 @@ if page == "Teman Belajar":
             } for answer in answers])
 else:
     with open("README.md", "r") as f:
+        st.write("[![Star](https://img.shields.io/github/stars/rifkybujana/IndoBERT-QA.svg?logo=github&style=social)](https://gitHub.com/rifkybujana/IndoBERT-QA) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/rifkybujana/IndoBERT-QA/blob/main/LICENSE)")
         st.write(f.read())
