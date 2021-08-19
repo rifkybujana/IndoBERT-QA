@@ -1,11 +1,12 @@
 """
     Copyright 2021 Rifky Bujana Bisri & Muhammad Fajrin Buyang Daffa
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
-    
+
         http://www.apache.org/licenses/LICENSE-2.0
-        
+
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +31,7 @@ from transformers import Trainer
 class Pipeline:
     """
     Utility to build prepare model and predict question answering task
+
     Args:
         - model_checkpoint: path to the model located (local path or huggingface path)
         - max_length: The maximum length of a feature (question and context)
@@ -37,7 +39,7 @@ class Pipeline:
         - impossible_answer: make this model to predict if the question is related to the context or not
     """
 
-    def __init__(self, model_checkpoint, max_length, doc_stride, impossible_answer):
+    def __init__(self, model_checkpoint="Rifky/Indobert-QA", max_length=384, doc_stride=128, impossible_answer=False):
         model = AutoModelForQuestionAnswering.from_pretrained(model_checkpoint)
 
         self.trainer = Trainer(model=model)
@@ -56,8 +58,10 @@ class Pipeline:
         tokenize the inputs (including converting the tokens to their corresponding IDs 
         in the pretrained vocabulary) and put it in a format the model expects, as 
         well as generate the other inputs that model requires.
+
         Args:
             - data: data that you want to feed into model
+
         Output:
             - tokenized_examples: data that has been preprocessed
         """
@@ -111,12 +115,14 @@ class Pipeline:
     ):
         """
         Postprocess the output of the model into readable text and score
+
         Args:
             - raw_data: the data we want to predict before taking into any process
             - features: data that already preprocessed
             - raw_predictions: output of the model prediction
             - n_best_size: number of best answer we want to consider as predictions
             - max_answer_length: maximum answer of this model
+
         Output:
             - predictions: best answer
             - answers: list of all the model answer
@@ -223,9 +229,11 @@ class Pipeline:
     def predict(self, context, questions):
         """
         Predict the answer of a question of a context
+
         Args:
             - context: context of the question
             - question: question that we want the model to answer
+
         output:
             - Best answer
             - List of answer
