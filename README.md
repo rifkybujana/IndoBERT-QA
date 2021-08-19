@@ -31,10 +31,17 @@ The model was trained on a Tesla T4 GPU and 12GB of RAM.
 from pipeline import Pipeline
 
 pipeline = Pipeline("model")
-prediction, answers = pipeline(
+pipeline.predict(
     "Pangeran Harya Dipanegara (atau biasa dikenal dengan nama Pangeran Diponegoro, lahir di Ngayogyakarta Hadiningrat, 11 November 1785 – meninggal di Makassar, Hindia Belanda, 8 Januari 1855 pada umur 69 tahun) adalah salah seorang pahlawan nasional Republik Indonesia, yang memimpin Perang Diponegoro atau Perang Jawa selama periode tahun 1825 hingga 1830 melawan pemerintah Hindia Belanda. Sejarah mencatat, Perang Diponegoro atau Perang Jawa dikenal sebagai perang yang menelan korban terbanyak dalam sejarah Indonesia, yakni 8.000 korban serdadu Hindia Belanda, 7.000 pribumi, dan 200 ribu orang Jawa serta kerugian materi 25 juta Gulden.",
     "kapan pangeran diponegoro lahir?"
 )
+```
+*output:*
+```py
+{
+    "best answer": OrderedDict([(0, '11 November 1785')]),
+    "answers": [{'score': 12.36208, 'text': '11 November 1785'}, {'score': 9.136721, 'text': '11 November 1785 - meninggal di Makassar, Hindia Belanda, 8 Januari 1855'}, {'score': 8.018387, 'text': '1785'}, {'score': 6.1863337, 'text': 'Ngayogyakarta Hadiningrat, 11 November 1785'}, {'score': 6.091961, 'text': '11 November 1785 -'}, {'score': 5.8137712, 'text': '11 November 178'}, {'score': 5.579988, 'text': '11 November'}, {'score': 5.423601, 'text': '11 November 1785 - meninggal di Makassar, Hindia Belanda, 8 Januari 1855 pada umur 69 tahun'}, ...]
+}
 ```
 ## Simple Usage (Using Huggingface)
 ```py
