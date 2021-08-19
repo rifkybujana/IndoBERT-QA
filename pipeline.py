@@ -224,7 +224,10 @@ class Pipeline:
                 )
                 predictions[example["id"]] = answer
 
-        return predictions, answers
+        return {
+            "best answer": predictions,
+            "answers": answers
+        }
 
     def predict(self, context, questions):
         """
