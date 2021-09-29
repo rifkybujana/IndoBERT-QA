@@ -149,7 +149,7 @@ class Pipeline:
             # Those are the indices of the features associated to the current example.
             feature_indices = features_per_example[example_index]
 
-            min_null_score = None  # Only used if squad_v2 is True.
+            min_null_score = None  # Only used if impossible_answer is True.
             valid_answers = []
 
             context = example["context"]
