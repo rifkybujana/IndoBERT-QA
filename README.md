@@ -5,12 +5,12 @@ This project is part of my research with my friend Muhammad Fajrin Buyang Daffa 
 **Model Size** (after training): 420mb
 
 ## Details of indoBERT (from their documentation)
-[IndoBERT](https://huggingface.co/indolem/indobert-base-uncased) is the Indonesian version of BERT model. We train the model using over 220M words, aggregated from three main sources:
+[IndoBERT](https://huggingface.co/indolem/indobert-base-uncased) is the Indonesian version of BERT model. This model trained using over 220M words, aggregated from three main sources:
 - Indonesian Wikipedia (74M words)
 - news articles from Kompas, Tempo (Tala et al., 2003), and Liputan6 (55M words in total)
 - an Indonesian Web Corpus (Medved and Suchomel, 2017) (90M words).
 
-We trained the model for 2.4M steps (180 epochs) with the final perplexity over the development set being 3.97 (similar to English BERT-base).
+This model trained for 2.4M steps (180 epochs) with the final perplexity over the development set being 3.97 (similar to English BERT-base).
 This IndoBERT was used to examine IndoLEM - an Indonesian benchmark that comprises of seven tasks for the Indonesian language, spanning morpho-syntax, semantics, and discourse.
 ## Details of the downstream task (Q&A) - Dataset
 SQuAD2.0 combines the 100,000 questions in SQuAD1.1 with over 50,000 unanswerable questions written adversarially by crowdworkers to look similar to answerable ones. To do well on SQuAD2.0, systems must not only answer questions when possible, but also determine when no answer is supported by the paragraph and abstain from answering.
