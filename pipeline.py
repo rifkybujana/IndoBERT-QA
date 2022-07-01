@@ -15,18 +15,20 @@
 """
 
 import collections
+import datasets
+import torch
 
 import numpy as np
 import pandas as pd
 
 from datasets import Dataset
-
-from tqdm.auto import tqdm
+from datasets.utils.logging import set_verbosity_error
 
 from transformers import AutoTokenizer
 from transformers import AutoModelForQuestionAnswering
-from transformers import Trainer
 
+datasets.disable_progress_bar()
+set_verbosity_error()
 
 class Pipeline:
     """
@@ -40,18 +42,17 @@ class Pipeline:
     """
 
     def __init__(self, model_checkpoint="Rifky/Indobert-QA", max_length=384, doc_stride=128, impossible_answer=False):
-        model = AutoModelForQuestionAnswering.from_pretrained(model_checkpoint)
+        self.__model = AutoModelForQuestionAnswering.from_pretrained(model_checkpoint)
 
-        self.trainer = Trainer(model=model)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
+        self.__tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
 
-        self.MAX_LENGTH = max_length
-        self.DOC_STRIDE = doc_stride
+        self.__MAX_LENGTH = max_length
+        self.__DOC_STRIDE = doc_stride
 
-        self.PAD_ON_RIGHT = self.tokenizer.padding_side == "right"
-        self.impossible_answer = impossible_answer
+        self.__PAD_ON_RIGHT = self.__tokenizer.padding_side == "right"
+        self.__impossible_answer = impossible_answer
 
-    def prepare_validation_features(self, data):
+    def __preprocess(self, data):
         """
         Before we can feed those texts to our model, we need to preprocess them. 
         This is done by a 🤗 Transformers Tokenizer which will (as the name indicates) 
@@ -74,12 +75,12 @@ class Pipeline:
         # Tokenize our examples with truncation and maybe padding, but keep the overflows using a stride. This results
         # in one example possible giving several features when a context is long, each of those features having a
         # context that overlaps a bit the context of the previous feature.
-        tokenized_examples = self.tokenizer(
-            data["question" if self.PAD_ON_RIGHT else "context"],
-            data["context" if self.PAD_ON_RIGHT else "question"],
-            truncation="only_second" if self.PAD_ON_RIGHT else "only_first",
-            max_length=self.MAX_LENGTH,
-            stride=self.DOC_STRIDE,
+        tokenized_examples = self.__tokenizer(
+            data["question" if self.__PAD_ON_RIGHT else "context"],
+            data["context" if self.__PAD_ON_RIGHT else "question"],
+            truncation="only_second" if self.__PAD_ON_RIGHT else "only_first",
+            max_length=self.__MAX_LENGTH,
+            stride=self.__DOC_STRIDE,
             return_overflowing_tokens=True,
             return_offsets_mapping=True,
             padding="max_length",
@@ -95,7 +96,7 @@ class Pipeline:
         for i in range(len(tokenized_examples["input_ids"])):
             # Grab the sequence corresponding to that example (to know what is the context and what is the question).
             sequence_ids = tokenized_examples.sequence_ids(i)
-            context_index = 1 if self.PAD_ON_RIGHT else 0
+            context_index = 1 if self.__PAD_ON_RIGHT else 0
 
             # One example can give several spans, this is the index of the example containing this span of text.
             sample_index = sample_mapping[i]
@@ -110,8 +111,8 @@ class Pipeline:
 
         return tokenized_examples
 
-    def postprocess_qa_predictions(
-        self, raw_data, features, raw_predictions, n_best_size=20, max_answer_length=100
+    def __postprocess(
+        self, raw_data, features, raw_predictions, n_best_size=10, max_answer_length=100
     ):
         """
         Postprocess the output of the model into readable text and score
@@ -139,13 +140,8 @@ class Pipeline:
         # The dictionaries we have to fill.
         predictions = collections.OrderedDict()
 
-        # Logging.
-        print(
-            f"Post-processing {len(raw_data)} example predictions split into {len(features)} features."
-        )
-
         # Let's loop over all the examples!
-        for example_index, example in enumerate(tqdm(raw_data)):
+        for example_index, example in enumerate(raw_data):
             # Those are the indices of the features associated to the current example.
             feature_indices = features_per_example[example_index]
 
@@ -165,7 +161,7 @@ class Pipeline:
 
                 # Update minimum null prediction.
                 cls_index = features[feature_index]["input_ids"].index(
-                    self.tokenizer.cls_token_id
+                    self.__tokenizer.cls_token_id
                 )
                 feature_null_score = start_logits[cls_index] + end_logits[cls_index]
                 if min_null_score is None or min_null_score < feature_null_score:
@@ -216,7 +212,7 @@ class Pipeline:
                 best_answer = {"text": "", "score": 0.0}
 
             # Let's pick our final answer: the best one or the null answer
-            if not self.impossible_answer:
+            if not self.__impossible_answer:
                 predictions[example["id"]] = best_answer["text"]
             else:
                 answer = (
@@ -256,15 +252,22 @@ class Pipeline:
         data = Dataset.from_pandas(pd.DataFrame(data))
         # Process the data
         data_feature = data.map(
-            self.prepare_validation_features,
+            self.__preprocess,
             batched=True,
             remove_columns=data.column_names,
         )
+        
+        temp_data_feature = {'input_ids': [], 'token_type_ids': [], 'attention_mask': []}
+        for i in data_feature:
+            for k, v in i.items():
+                if k in temp_data_feature.keys():
+                    temp_data_feature[k].append(v)
 
         # Get model prediction
-        raw_prediction = self.trainer.predict(data_feature)
+        raw_prediction = self.__model(**{k: torch.tensor(v) for k, v in temp_data_feature.items()})
+        del temp_data_feature
 
         # Return final prediction and list of all model answer
-        return self.postprocess_qa_predictions(
-            data, data_feature, raw_prediction.predictions
+        return self.__postprocess(
+            data, data_feature, [raw_prediction.start_logits.detach().numpy(), raw_prediction.end_logits.detach().numpy()]
         )
