@@ -1,5 +1,5 @@
 py_cpuinfo==8.0.0
-transformers==4.8.2
+transformers==4.30.0
 torch==1.13.1
 tqdm==4.61.2
 numpy==1.22.0
