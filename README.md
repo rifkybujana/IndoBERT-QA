@@ -1,4 +1,10 @@
-This project is part of my research who won a silver medal at the KoPSI (Kompetisi Penelitian Siswa Indonesia/Indonesian Student Research Competition) entitled "Teman Belajar: Asisten Digital Pelajar SMAN 28 Jakarta dalam Membaca".
+**Notice of Attribution Clarification**
+
+This is to clarify that **Muhammad Fajrin Buyang Daffa** is not, and has never been, a part of this project. They have made no contributions to this repository, and as such, shall not be given any attribution in relation to this work.
+
+For further inquiries, please contact the rifky@genta.tech.
+
+> This project is part of my research who won a silver medal at the KoPSI (Kompetisi Penelitian Siswa Indonesia/Indonesian Student Research Competition) entitled "Teman Belajar: Asisten Digital Pelajar SMAN 28 Jakarta dalam Membaca".
 ## indoBERT Base-Uncased fine-tuned on Translated Squad v2.0
 [IndoBERT](https://huggingface.co/indolem/indobert-base-uncased) trained by [IndoLEM](https://indolem.github.io/) and fine-tuned on [Translated SQuAD 2.0](https://github.com/Wikidepia/indonesian_datasets/tree/master/question-answering/squad) for **Q&A** downstream task.
 
