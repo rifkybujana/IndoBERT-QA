@@ -4,7 +4,7 @@ This is to clarify that **Muhammad Fajrin Buyang Daffa** is not, and has never b
 
 For further inquiries, please contact the rifky@genta.tech.
 
-> This project is part of my research who won a silver medal at the KoPSI (Kompetisi Penelitian Siswa Indonesia/Indonesian Student Research Competition) entitled "Teman Belajar: Asisten Digital Pelajar SMAN 28 Jakarta dalam Membaca".
+> This project is used by one of my research who won a silver medal at the KoPSI (Kompetisi Penelitian Siswa Indonesia/Indonesian Student Research Competition) entitled "Teman Belajar: Asisten Digital Pelajar SMAN 28 Jakarta dalam Membaca".
 ## indoBERT Base-Uncased fine-tuned on Translated Squad v2.0
 [IndoBERT](https://huggingface.co/indolem/indobert-base-uncased) trained by [IndoLEM](https://indolem.github.io/) and fine-tuned on [Translated SQuAD 2.0](https://github.com/Wikidepia/indonesian_datasets/tree/master/question-answering/squad) for **Q&A** downstream task.
 
